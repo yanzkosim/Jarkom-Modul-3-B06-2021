@@ -8,43 +8,265 @@
 
 ### **Soal 1**
 
+Membuat EniesLobby sebagai DNS Server, Jipangu sebagai DHCP Server, Water7 sebagai Proxy Server.
+
 ### **Jawab**
+
+Setelah topology dibuat seperti pada soal, dilakukan instalasi dengan cara dijalankan command-command berikut,
+
+- Pada EniesLobby
+
+```
+apt-get update
+apt-get install bind9 -y
+```
+
+dan untuk konfigurasi, ditambahkan konfigurasi berikut pada file `/etc/bind/named.conf.options`
+
+```
+options {
+        directory \"/var/cache/bind\";
+
+        // If there is a firewall between you and nameservers you want
+        // to talk to, you may need to fix the firewall to allow multiple
+        // ports to talk.  See http://www.kb.cert.org/vuls/id/800113
+
+        // If your ISP provided one or more IP addresses for stable
+        // nameservers, you probably want to use them as forwarders.
+        // Uncomment the following block, and insert the addresses replacing
+        // the all-0's placeholder.
+
+        forwarders {
+	 192.168.122.1;
+        };
+
+        //======================================================================
+        // If BIND logs error messages about the root key being expired,
+        // you will need to update your keys.  See https://www.isc.org/bind-keys
+                //=============================================================$
+        // dnssec-validation auto;
+        allow-query{ any; };
+	auth-nxdomain no;    # conform to RFC1035
+        listen-on-v6 { any; };
+};
+```
+
+Seperti pada modul sebelumnya, dibuat folder kaizoku `mkdir /etc/bind/kaizoku`,
+
+dan di-copy konfigurasi db.local dan di-pastekan dengan nama super.franky.B06.com `cp /etc/bind/db.local /etc/bind/kaizoku/super.franky.B06.com`,
+
+ditambahkan konfigurasi berikut pada file `/etc/bind/kaizoku/super.franky.B06.com`
+
+![1_config](https://github.com/yanzkosim/Jarkom-Modul-3-B06-2021/blob/main/Screenshot/1-1.png)
+
+Selanjutnya pada file `/etc/bind/named.conf.local` ditambahkan konfigurasi berikut
+
+```
+zone "super.franky.B06.com" {
+        type master;
+        notify yes;
+        file "/etc/bind/kaizoku/super.franky.B06.com";
+};
+```
+
+Kemudian dilakukan restart setelahnya `service bind9 restart`
+
+- Pada Jipangu
+
+```
+apt-get update
+apt-get install isc-dhcp-server -y
+```
+
+dan untuk konfigurasi, ditambahkan konfigurasi berikut pada file `/etc/default/isc-dhcp-server`
+
+```
+# Defaults for isc-dhcp-server initscript
+# sourced by /etc/init.d/isc-dhcp-server
+# installed at /etc/default/isc-dhcp-server by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# Path to dhcpd's config file (default: /etc/dhcp/dhcpd.conf).
+#DHCPD_CONF=/etc/dhcp/dhcpd.conf
+
+# Path to dhcpd's PID file (default: /var/run/dhcpd.pid).
+#DHCPD_PID=/var/run/dhcpd.pid
+
+# Additional options to start dhcpd with.
+#       Don't use options -cf or -pf here; use DHCPD_CONF/ DHCPD_PID instead
+#OPTIONS=\"\"
+
+# On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
+#       Separate multiple interfaces with spaces, e.g. \"eth0 eth1\".
+INTERFACES=\"eth0\"
+```
+
+Dan dilakukan restart setelahnya `service isc-dhcp-server restart`
+
+- Pada Water7
+
+```
+apt-get update
+apt-get install squid -y
+apt-get install apache2-utils -y
+```
 
 #
 
 ### **Soal 2**
 
+Membuat Foosha sebagai DHCP Relay.
+
 ### **Jawab**
+
+Selanjutnya pada Foosha, dilakukan instalasi terlebih dahulu dengan command
+
+```
+apt-get update
+apt-get install isc-dhcp-relay -y
+```
+
+dan pada file `/etc/default/isc-dhcp-relay` ditambahkan konfigurasi berikut
+
+```
+# Defaults for isc-dhcp-relay initscript
+# sourced by /etc/init.d/isc-dhcp-relay
+# installed at /etc/default/isc-dhcp-relay by the maintainer scripts
+
+#
+# This is a POSIX shell fragment
+#
+
+# What servers should the DHCP relay forward requests to?
+SERVERS=\"10.10.2.4\"
+
+# On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
+INTERFACES=\"eth1 eth2 eth3\"
+
+# Additional options that are passed to the DHCP relay daemon?
+OPTIONS=\"\"
+```
+
+Kemudian dilakukan restart `service isc-dhcp-relay restart`
 
 #
 
-### **Soal 3**
+### **Soal 3, 4, dan 6**
+
+Semua client yang ada HARUS menggunakan konfigurasi IP dari DHCP Server.
+
+Client yang melalui Switch1 mendapatkan range IP dari [prefix IP].1.20 - [prefix IP].1.99 dan [prefix IP].1.150 - [prefix IP].1.169.
+
+Client yang melalui Switch3 mendapatkan range IP dari [prefix IP].3.30 - [prefix IP].3.50.
+
+Lama waktu DHCP server meminjamkan alamat IP kepada Client yang melalui Switch1 selama 6 menit sedangkan pada client yang melalui Switch3 selama 12 menit. 
+
+Dengan waktu maksimal yang dialokasikan untuk peminjaman alamat IP selama 120 menit.
 
 ### **Jawab**
 
-#
+Pada setiap client, digunakan konfigurasi berikut pada network configuration-nya agar client menggunakan konfigurasi IP dari DHCP server.
 
-### **Soal 4**
+```
+auto eth0
+iface eth0 inet dhcp
+```
 
-### **Jawab**
+Pada Jipangu dibuat konfigurasi berikut pada file `/etc/dhcp/dhcpd.conf`
+
+```
+// switch 2
+subnet 10.10.2.0 netmask 255.255.255.0 {
+        option routers 10.10.2.1;
+}
+
+// switch 1
+subnet 10.10.1.0 netmask 255.255.255.0 {
+        range 10.10.1.20 10.10.1.99;		// range IP [prefix IP].1.20 - [prefix IP].1.99
+        range 10.10.1.150 10.10.1.169;		// range IP [prefix IP].1.150 - [prefix IP].1.169
+        option routers 10.10.1.1;
+        option broadcast-address 10.10.1.255;
+        option domain-name-servers 10.10.2.2;
+	default-lease-time 360;			// waktu yang dipinjamkan DHCP server 6 menit
+        max-lease-time 7200;			// waktu maksimal 120 menit
+}
+
+/// switch 3
+subnet 10.10.3.0 netmask 255.255.255.0 {
+        range 10.10.3.30 10.10.3.50;		// range IP [prefix IP].3.30 - [prefix IP].3.50
+        option routers 10.10.3.1;
+        option broadcast-address 10.10.3.255;
+        option domain-name-servers 10.10.2.2;	
+        default-lease-time 720;			// waktu yang dipinjamkan DHCP server 12 menit
+        max-lease-time 7200;			// waktu maksimal 120 menit
+}
+```
+
+Lalu dilakukan restart `service isc-dhcp-server restart`,
+
+dan diperiksa pada setiap client apakah sudah mendapatkan IP yang sesuai
+
+- Loguetown
+
+![3_ip1](https://github.com/yanzkosim/Jarkom-Modul-3-B06-2021/blob/main/Screenshot/3-1.png)
+
+- Alabasta
+
+![3_ip2](https://github.com/yanzkosim/Jarkom-Modul-3-B06-2021/blob/main/Screenshot/3-2.png)
+
+- TottoLand
+
+![3_ip3](https://github.com/yanzkosim/Jarkom-Modul-3-B06-2021/blob/main/Screenshot/3-3.png)
 
 #
 
 ### **Soal 5**
 
-### **Jawab**
-
-#
-
-### **Soal 6**
+Client mendapatkan DNS dari EniesLobby dan client dapat terhubung dengan internet melalui DNS tersebut.
 
 ### **Jawab**
+
+Pada EniesLobby file `/etc/bind/named.conf.options` uncomment `allow-query{ any; };`
+
+![5_unc](https://github.com/yanzkosim/Jarkom-Modul-3-B06-2021/blob/main/Screenshot/5-1.png)
+
+dan dijalankan command `echo "nameserver 192.168.122.1" >> /etc/resolv.conf`
 
 #
 
 ### **Soal 7**
 
+Skypie dengan alamat IP yang tetap dengan IP [prefix IP].3.69.
+
 ### **Jawab**
+
+Pada Skypie dijalankan command `ip a` untuk memperoleh hwaddress, dan diperoleh `82:78:a0:21:d4:5b`
+
+![7_hwa](https://github.com/yanzkosim/Jarkom-Modul-3-B06-2021/blob/main/Screenshot/7-1.png)
+
+Pada network configuration Skypie ditambahkan konfigurasi berikut menggunakan hwaddress yang telah diperoleh
+
+```
+hwaddress ether 82:78:a0:21:d4:5b
+```
+
+Pada Jipangu file `/etc/dhcp/dhcpd.conf` ditambahkan konfigurasi berikut
+
+```
+host Skypie {
+        hardware ethernet 82:78:a0:21:d4:5b;	/// menggunakan hwaddress yang telah diperoleh
+        fixed-address 10.10.3.69;		/// fixed address yang diminta
+}
+```
+
+Kemudian dilakukan restart `service isc-dhcp-server restart`,
+
+dan diperiksa pada Skypie apakah sudah mendapatkan IP yang sesuai
+
+![7_ip](https://github.com/yanzkosim/Jarkom-Modul-3-B06-2021/blob/main/Screenshot/7-2.png)
 
 #
 
