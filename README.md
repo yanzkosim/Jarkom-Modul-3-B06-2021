@@ -46,7 +46,7 @@ zone \"jualbelikapal.B06.com\" {
 };
 ```
 
-![8_Konfig zone]((https://github.com/yanzkosim/Jarkom-Modul-3-B06-2021/blob/main/Screenshot/8-2.png))
+![8_Konfig zone](https://github.com/yanzkosim/Jarkom-Modul-3-B06-2021/blob/main/Screenshot/8-2.png)
 
 Untuk mengetahui apakah domain telah berfungsi dengan baik, dilakukan ping dari client
 
