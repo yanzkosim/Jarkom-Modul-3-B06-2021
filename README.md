@@ -122,7 +122,7 @@ export http_proxy="http://jualbelikapal.B06.com:5000"
 
 ### **Soal 9**
 
-Digunakan 2 autentikasi user proxy dengan enkripsi MD5 yaitu ***luffybelikapalB06*** dengan password ***luffy_B06*** dan ***zorobelikapalB06*** dengan password ***zoro_B06***.
+Digunakan 2 autentikasi user proxy dengan enkripsi MD5 yaitu ***luffybelikapalB06*** dengan password ***luffy_B06*** dan ***zorrobelikapalB06*** dengan password ***zorro_B06***.
 
 ### **Jawab**
 
