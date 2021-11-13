@@ -39,10 +39,10 @@ echo ";
 Setelah diubah, zone pada `/etc/bind/named.conf.local` juga ditambahi domain yang telah dibuat tadi 
 
 ```
-zone \"jualbelikapal.B06.com\" {
+zone "jualbelikapal.B06.com" {
 		type master;
 		notify yes;
-		file \"/etc/bind/kaizoku/jualbelikapal.B06.com\";
+		file "/etc/bind/kaizoku/jualbelikapal.B06.com";
 };
 ```
 
