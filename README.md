@@ -229,7 +229,7 @@ Client mendapatkan DNS dari EniesLobby dan client dapat terhubung dengan interne
 
 ### **Jawab**
 
-Pada EniesLobby file `/etc/bind/named.conf.options` uncomment `allow-query{ any; };`
+Pada EniesLobby file `/etc/bind/named.conf.options` tambahkan `allow-query{ any; };`, jadikan ` dnssec-validation auto;` sebagai komen atau bisa dihapus, kemudian uncomment pada bagian forwardernya, lalu ganti 0.0.0.0 di forwarder menjadi **192.168.122.1**
 
 ![5_unc](https://github.com/yanzkosim/Jarkom-Modul-3-B06-2021/blob/main/Screenshot/5-1.png)
 
